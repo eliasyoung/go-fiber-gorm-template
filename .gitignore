@@ -7,3 +7,5 @@ bin/
 .air.toml
 
 docs/
+
+.DS_Store

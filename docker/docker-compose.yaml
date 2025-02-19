@@ -1,0 +1,62 @@
+version: "1.0.0"
+name: "fiber-flavor-services"
+
+services:
+  services-api:
+    container_name: fiber_flavor_api
+    image: fiber-flavor
+    depends_on:
+      - services-db
+    env_file: .env # 加载 .env 文件中的环境变量
+    environment:
+      - ADDR = ${ADDR}
+      - DB_HOST=services-db
+      - DB_PORT=${INNER_DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - ENV=${ENV}
+      - EXTERNAL_URL=${EXTERNAL_URL}
+    ports:
+      - "${ADDR}:${ADDR}"
+    networks:
+      - fiber_flavor_proxy_network
+
+  services-db:
+    container_name: ${DB_NAME}_db_container
+    image: postgres:16.4
+    restart: always
+    env_file: .env # 加载 .env 文件中的环境变量
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/${DB_NAME}/data
+      PGPORT: ${INNER_DB_PORT}
+    ports:
+      - "${DB_PORT}:${INNER_DB_PORT}"
+    volumes:
+      - db-data:/var/lib/postgresql/${DB_NAME}/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${DB_USER}",
+          "-d",
+          "${DB_NAME}",
+          "-h",
+          "localhost",
+        ]
+      interval: 5s
+      retries: 5
+    networks:
+      - fiber_flavor_proxy_network
+
+networks:
+  fiber_flavor_proxy_network:
+    driver: bridge
+
+volumes:
+  db-data:

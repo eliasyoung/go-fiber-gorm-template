@@ -1,0 +1,9 @@
+.env
+
+tmp/
+bin/
+
+
+.air.toml
+
+docs/

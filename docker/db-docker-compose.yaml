@@ -1,0 +1,35 @@
+version: "1.0.0"
+name: whatever-go-project-db
+
+services:
+  db:
+    container_name: whatever_db_container
+    image: postgres:16.4
+    restart: always
+    environment:
+      POSTGRES_DB: whatever
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      PGDATA: /var/lib/postgresql/whatever/data
+      PGPORT: 5429
+    ports:
+      - "8848:5429"
+    volumes:
+      - db-data:/var/lib/postgresql/whatever/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "admin",
+          "-d",
+          "whatever",
+          "-h",
+          "localhost",
+        ]
+      interval: 5s
+      retries: 5
+
+volumes:
+  db-data:
